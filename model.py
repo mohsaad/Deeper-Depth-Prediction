@@ -112,22 +112,25 @@ class FastUpConvolution:
         self.batch_size = batch_size
 
         # do 4 convolutions on the same output with different kernels
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, bias = False)
-        self.conv2 = nn.Conv2d(in_channels, out_channels, (2,3), bias = False)
-        self.conv3 = nn.Conv2d(in_channels, out_channels, (3,2), bias = False)
-        self.conv4 = nn.Conv2d(in_channels, out_channels, 2, bias = False)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, (3,3))
+        self.conv2 = nn.Conv2d(in_channels, out_channels, (2,3))
+        self.conv3 = nn.Conv2d(in_channels, out_channels, (3,2))
+        self.conv4 = nn.Conv2d(in_channels, out_channels, (2,2))
 
     # interleaving operation
-    def interleave(self):
+    def interleave(self, out1, out2, out3, out4):
+
+
+
         return
 
     def forward(self, x):
-        out1 = self.conv1(x)
-        out2 = self.conv2(x)
-        out3 = self.conv3(x)
-        out4 = self.conv4(x)
+        out1 = self.conv1(x, nn.functional.pad(x, (1,1,1,1)))
+        out2 = self.conv2(x, nn.functional.pad(x, (1,1,1,0)))
+        out3 = self.conv3(x, nn.functional.pad(x, (1,0,1,1)))
+        out4 = self.conv4(x, nn.functional.pad(x, (1,0,1,0)))
 
-        out = self.interleave()
+        out = self.interleave(out1, out2, out3, out4)
 
         return out
 
