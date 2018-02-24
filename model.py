@@ -118,11 +118,26 @@ class FastUpConvolution:
         self.conv4 = nn.Conv2d(in_channels, out_channels, (2,2))
 
     # interleaving operation
+	def interleave_helper(self, tensors, axis):
+		tensor_shape = None
+		if isinstance(tensors[0], torch.Tensor):
+			tensor_shape = list(tensors[0].size())
+		elif type(tensors[0] in [np.array, list, tuple]):
+			tensor_shape = np.shape(tensors[0])
+		else:
+			raise Exception("Bad tensor to interleave")
+
+		new_shape = [-1] + tensor_shape
+		new_shape[axis] *= len(tensors)
+		return torch.view(torch.stack(tensors, axis + 1), new_shape)
+
+
     def interleave(self, out1, out2, out3, out4):
+		left = self.interleave_helper([out1, out2], axis = 1)
+		right = self.interleave_helper([out3, out4], axis = 1)
+		output = self.interleave([left, right], axis = 2)
 
-
-
-        return
+        return output
 
     def forward(self, x):
         out1 = self.conv1(x, nn.functional.pad(x, (1,1,1,1)))
