@@ -117,6 +117,8 @@ class FastUpConvolution(nn.Module):
         self.conv3 = nn.Conv2d(in_channels, out_channels, (3,2))
         self.conv4 = nn.Conv2d(in_channels, out_channels, (2,2))
 
+		self.bn = nn.BatchNorm2d(out_channels)
+
     # interleaving operation
 	def interleave_helper(self, tensors, axis):
 		tensor_shape = None
@@ -148,6 +150,8 @@ class FastUpConvolution(nn.Module):
 
         out = self.interleave(out1, out2, out3, out4)
 
+		out = self.bn(out)
+
         return out
 
 class FastUpProjection(nn.Module):
@@ -157,6 +161,7 @@ class FastUpProjection(nn.Module):
 
         self.UpConv1 = FastUpConvolution(in_channels, out_channels, batch_size)
         self.relu1 = nn.ReLU(inplace = True)
+		self.bn = nn.BatchNorm2d(out_channels)
 
         self.UpConv2 = FastUpConvolution(in_channels, out_channels, batch_size)
 
@@ -164,11 +169,12 @@ class FastUpProjection(nn.Module):
         self.relu2 = nn.ReLU(inplace = True)
 
     def forward(self, x):
-        out1 = self.UpConv1.forward(x)
-        out2 = self.UpConv2.forward(x)
+        out1 = self.UpConv1(x)
+        out2 = self.UpConv2(x)
 
         out1 = self.relu1(out1)
         out1 = self.conv1(out1)
+		out1 = self.bn(out1)
 
         out = out1 + out2
         out = self.relu2(out)
@@ -186,25 +192,25 @@ class Model(nn.Module):
 		self.relu1 = nn.ReLU(inplace = True)
 		self.max_pool1 = nn.MaxPool2d(3, stride = 2)
 
-		self.proj1 = ProjectionBlock(block1, 64, d1 = 64, d2 = 256, stride = 1)
-		self.res1_1 = ResidualBlock(block1, 256, d1 = 64, d2 = 256, stride = 1)
-		self.res1_2 =  ResidualBlock(block1, 256, d1 = 64, d2 = 256, stride = 1)
+		self.proj1 = ProjectionBlock(64, d1 = 64, d2 = 256, stride = 1)
+		self.res1_1 = ResidualBlock(256, d1 = 64, d2 = 256, stride = 1)
+		self.res1_2 =  ResidualBlock(256, d1 = 64, d2 = 256, stride = 1)
 
-		self.proj2 = ProjectionBlock(block1, 256, d1 = 128, d2 = 512, stride = 2)
-		self.res2_1 = ResidualBlock(block1, 512, d1 = 128, d2 = 512, stride = 1)
-		self.res2_2 = ResidualBlock(block1, 512, d1 = 128, d2 = 512, stride = 1)
-		self.res2_3 = ResidualBlock(block1, 512, d1 = 128, d2 = 512, stride = 1)
+		self.proj2 = ProjectionBlock(256, d1 = 128, d2 = 512, stride = 2)
+		self.res2_1 = ResidualBlock(512, d1 = 128, d2 = 512, stride = 1)
+		self.res2_2 = ResidualBlock(512, d1 = 128, d2 = 512, stride = 1)
+		self.res2_3 = ResidualBlock(512, d1 = 128, d2 = 512, stride = 1)
 
-		self.proj3 = ProjectionBlock(block1, 512, d1 = 256, d2 = 1024, stride = 2)
-		self.res3_1 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
-		self.res3_2 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
-		self.res3_3 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
-		self.res3_4 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
-		self.res3_5 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
+		self.proj3 = ProjectionBlock(512, d1 = 256, d2 = 1024, stride = 2)
+		self.res3_1 = ResidualBlock(1024, d1 = 256, d2 = 1024)
+		self.res3_2 = ResidualBlock(1024, d1 = 256, d2 = 1024)
+		self.res3_3 = ResidualBlock(1024, d1 = 256, d2 = 1024)
+		self.res3_4 = ResidualBlock(1024, d1 = 256, d2 = 1024)
+		self.res3_5 = ResidualBlock(1024, d1 = 256, d2 = 1024)
 
-		self.proj4 = ProjectionBlock(block1, 1024, d1 = 512, d2 = 2048, stride = 2)
-		self.res4_1 = ResidualBlock(block1, 2048, d1 = 512, d2 = 2048)
-		self.res4_2 = ResidualBlock(block1, 2048, d1 = 512, d2 = 2048)
+		self.proj4 = ProjectionBlock(1024, d1 = 512, d2 = 2048, stride = 2)
+		self.res4_1 = ResidualBlock(2048, d1 = 512, d2 = 2048)
+		self.res4_2 = ResidualBlock(2048, d1 = 512, d2 = 2048)
 
 		self.conv2 = nn.Conv2d(2048, 1024, kernel_size = 1)
 		self.bn2 = BatchNorm2d(1024)
