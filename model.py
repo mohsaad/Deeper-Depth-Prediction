@@ -104,7 +104,7 @@ class ProjectionBlock(nn.Module):
 
 # Fast Up Convolution from the paper, including the interleaving step
 
-class FastUpConvolution:
+class FastUpConvolution(nn.Module):
 
     def __init__(self, in_channels, out_channels, batch_size):
         super(FastUpConvolution, self).__init__()
@@ -127,6 +127,7 @@ class FastUpConvolution:
 		else:
 			raise Exception("Bad tensor to interleave")
 
+		# pretty much a tensorflow equivalent. prepend a [-1], stack the tensors, then reshape them
 		new_shape = [-1] + tensor_shape
 		new_shape[axis] *= len(tensors)
 		return torch.view(torch.stack(tensors, axis + 1), new_shape)
@@ -149,7 +150,7 @@ class FastUpConvolution:
 
         return out
 
-class FastUpProjection:
+class FastUpProjection(nn.Module):
 
     def __init__(self, in_channels, out_channels, batch_size):
         super(FastUpProjection, self).__init__()
@@ -173,3 +174,87 @@ class FastUpProjection:
         out = self.relu2(out)
 
         return out
+
+class Model(nn.Module):
+
+	def __init__(self, block1, block2, batch_size):
+		super(Model, self).__init__()
+		self.batch_size = batch_size
+
+		self.conv1 = nn.Conv2d(3, 64, kernel_size = 7, stride = 2, padding = 4)
+		self.bn1 = nn.BatchNorm2d(64)
+		self.relu1 = nn.ReLU(inplace = True)
+		self.max_pool1 = nn.MaxPool2d(3, stride = 2)
+
+		self.proj1 = ProjectionBlock(block1, 64, d1 = 64, d2 = 256, stride = 1)
+		self.res1_1 = ResidualBlock(block1, 256, d1 = 64, d2 = 256, stride = 1)
+		self.res1_2 =  ResidualBlock(block1, 256, d1 = 64, d2 = 256, stride = 1)
+
+		self.proj2 = ProjectionBlock(block1, 256, d1 = 128, d2 = 512, stride = 2)
+		self.res2_1 = ResidualBlock(block1, 512, d1 = 128, d2 = 512, stride = 1)
+		self.res2_2 = ResidualBlock(block1, 512, d1 = 128, d2 = 512, stride = 1)
+		self.res2_3 = ResidualBlock(block1, 512, d1 = 128, d2 = 512, stride = 1)
+
+		self.proj3 = ProjectionBlock(block1, 512, d1 = 256, d2 = 1024, stride = 2)
+		self.res3_1 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
+		self.res3_2 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
+		self.res3_3 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
+		self.res3_4 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
+		self.res3_5 = ResidualBlock(block1, 1024, d1 = 256, d2 = 1024)
+
+		self.proj4 = ProjectionBlock(block1, 1024, d1 = 512, d2 = 2048, stride = 2)
+		self.res4_1 = ResidualBlock(block1, 2048, d1 = 512, d2 = 2048)
+		self.res4_2 = ResidualBlock(block1, 2048, d1 = 512, d2 = 2048)
+
+		self.conv2 = nn.Conv2d(2048, 1024, kernel_size = 1)
+		self.bn2 = BatchNorm2d(1024)
+
+		self.UpProj1 = FastUpProjection(1024, 512, self.batch_size)
+		self.UpProj2 = FastUpProjection(512, 256, self.batch_size)
+		self.UpProj3 = FastUpProjection(256, 128, self.batch_size)
+		self.UpProj4 = FastUpProjection(128, 64, self.batch_size)
+
+		self.conv3 = nn.Conv2d(64, 3, kernel_size = 3)
+		self.relu2 = nn.ReLU(inplace = True)
+
+
+	def forward(self, x):
+		out = self.conv1(x)
+		out = self.bn1(out)
+		out = self.relu1(out)
+		out = self.max_pool1(out)
+
+		out = self.proj1(out)
+		out = self.res1_1(out)
+		out = self.res1_2(out)
+
+		out = self.proj2(out)
+		out = self.res2_1(out)
+		out = self.res2_2(out)
+		out = self.res2_3(out)
+
+		out = self.proj3(out)
+		out = self.res3_1(out)
+		out = self.res3_2(out)
+		out = self.res3_3(out)
+		out = self.res3_4(out)
+		out = self.res3_5(out)
+
+		out = self.proj4(out)
+		out = self.res4_1(out)
+		out = self.res4_2(out)
+
+		out = self.conv2(out)
+		out = self.bn2(out)
+
+		out = self.UpProj1(out)
+		out = self.UpProj2(out)
+		out = self.UpProj3(out)
+		out = self.UpProj4(out)
+
+		out = self.conv3(out)
+		out = self.relu2(out)
+
+		# insert upsampling here?
+
+		return out
