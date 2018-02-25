@@ -9,117 +9,115 @@ from torch.autograd import Variable
 
 class ResidualBlock(nn.Module):
 
-    def __init__(self, in_channels, d1, d2, stride = 1):
-        super(ResidualBlock, self).__init__()
+	def __init__(self, in_channels, d1, d2, stride = 1):
+		super(ResidualBlock, self).__init__()
 
-        # leading into d1
-        self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = 1, bias = False)
-        self.bn1 = nn.BatchNorm2d(d1)
-        self.relu1 = nn.ReLU(inplace = True)
+		# leading into d1
+		self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = 1, bias = False)
+		self.bn1 = nn.BatchNorm2d(d1)
+		self.relu1 = nn.ReLU(inplace = True)
 
-        # leading into d1-2
-        self.conv2 = nn.Conv2d(d1, d1, 3, padding = True, bias = False)
-        self.bn2 = nn.BatchNorm2d(d1)
-        self.relu2 = nn.ReLU(inplace = True)
+		# leading into d1-2
+		self.conv2 = nn.Conv2d(d1, d1, 3, padding = True, bias = False)
+		self.bn2 = nn.BatchNorm2d(d1)
+		self.relu2 = nn.ReLU(inplace = True)
 
-        # leading into d2
-        self.conv3 = nn.Conv2d(d1, d2, 1, bias = False)
-        self.bn3 = nn.BatchNorm2d(d2)
+		# leading into d2
+		self.conv3 = nn.Conv2d(d1, d2, 1, bias = False)
+		self.bn3 = nn.BatchNorm2d(d2)
 
-        # if not self.skip:
-        #     self.conv4 = nn.Conv2d(in_channels, d2, stride, bias = False)
-        #     self.bn4 = nn.BatchNorm2d(d2)
+		# if not self.skip:
+		#     self.conv4 = nn.Conv2d(in_channels, d2, stride, bias = False)
+		#     self.bn4 = nn.BatchNorm2d(d2)
 
-        # final Relu at end of layer
-        self.relu3 = nn.ReLU(inplace = True)
+		# final Relu at end of layer
+		self.relu3 = nn.ReLU(inplace = True)
 
 
-    def forward(self, x):
+	def forward(self, x):
 
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu1(out)
+		out = self.conv1(x)
+		out = self.bn1(out)
+		out = self.relu1(out)
 
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu2(out)
+		out = self.conv2(out)
+		out = self.bn2(out)
+		out = self.relu2(out)
 
-        out = self.conv3(out)
-        out = self.bn3(out)
+		out = self.conv3(out)
+		out = self.bn3(out)
 
-        out += x
+		out += x
 
-        out = self.relu3(out)
+		out = self.relu3(out)
 
-        return out
+		return out
 
 class ProjectionBlock(nn.Module):
 
-    def __init__(self, in_channels, d1, d2, stride = 1):
-        super(ProjectionBlock, self).__init__()
+	def __init__(self, in_channels, d1, d2, stride = 1):
+		super(ProjectionBlock, self).__init__()
 
-        # feeding into first d1 block
-        self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = 5, bias = False)
-        self.bn1 = nn.BatchNorm2d(d1)
-        self.relu1 = nn.ReLU(inplace = True)
+		# feeding into first d1 block
+		self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = 5, bias = False)
+		self.bn1 = nn.BatchNorm2d(d1)
+		self.relu1 = nn.ReLU(inplace = True)
 
-        # feeding into second d1 block
-        self.conv2 = nn.Conv2d(d1, d1, 3, padding = 2, bias = False)
-        self.bn2 = nn.BatchNorm2d(d1)
-        self.relu2 = nn.ReLU(inplace = True)
+		# feeding into second d1 block
+		self.conv2 = nn.Conv2d(d1, d1, 3, padding = 2, bias = False)
+		self.bn2 = nn.BatchNorm2d(d1)
+		self.relu2 = nn.ReLU(inplace = True)
 
-        # feeding into first d2 block
-        self.conv3 = nn.Conv2d(d1, d2, 1, bias = False)
-        self.bn3 = nn.BatchNorm2d(d2)
+		# feeding into first d2 block
+		self.conv3 = nn.Conv2d(d1, d2, 1, bias = False)
+		self.bn3 = nn.BatchNorm2d(d2)
 
-        # feeding into second d2 block
-        self.conv4 = nn.Conv2d(in_channels, d2, 1, stride = 5, bias = False)
-        self.bn4 = nn.BatchNorm2d(d2)
+		# feeding into second d2 block
+		self.conv4 = nn.Conv2d(in_channels, d2, 1, stride = 5, bias = False)
+		self.bn4 = nn.BatchNorm2d(d2)
 
-        self.relu3 = nn.ReLU(inplace = True)
+		self.relu3 = nn.ReLU(inplace = True)
 
 
-    def forward(self, x):
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu1(out)
+	def forward(self, x):
+		out = self.conv1(x)
+		out = self.bn1(out)
+		out = self.relu1(out)
 
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu2(out)
+		out = self.conv2(out)
+		out = self.bn2(out)
+		out = self.relu2(out)
 
-        out = self.conv3(out)
-        out = self.bn3(out)
+		out = self.conv3(out)
+		out = self.bn3(out)
 
-        # do residual branch
-        residual = x
-        residual = self.conv4(residual)
-        residual = self.bn4(residual)
+		# do residual branch
+		residual = x
+		residual = self.conv4(residual)
+		residual = self.bn4(residual)
 
-        out += residual
+		out += residual
 
-        out = self.relu3(out)
+		out = self.relu3(out)
 
-        return out
+		return out
 
 # Fast Up Convolution from the paper, including the interleaving step
-
 class FastUpConvolution(nn.Module):
+	def __init__(self, in_channels, out_channels, batch_size):
+		super(FastUpConvolution, self).__init__()
 
-    def __init__(self, in_channels, out_channels, batch_size):
-        super(FastUpConvolution, self).__init__()
+		self.batch_size = batch_size
 
-        self.batch_size = batch_size
-
-        # do 4 convolutions on the same output with different kernels
-        self.conv1 = nn.Conv2d(in_channels, out_channels, (3,3))
-        self.conv2 = nn.Conv2d(in_channels, out_channels, (2,3))
-        self.conv3 = nn.Conv2d(in_channels, out_channels, (3,2))
-        self.conv4 = nn.Conv2d(in_channels, out_channels, (2,2))
+		# do 4 convolutions on the same output with different kernels
+		self.conv1 = nn.Conv2d(in_channels, out_channels, (3,3))
+		self.conv2 = nn.Conv2d(in_channels, out_channels, (2,3))
+		self.conv3 = nn.Conv2d(in_channels, out_channels, (3,2))
+		self.conv4 = nn.Conv2d(in_channels, out_channels, (2,2))
 
 		self.bn = nn.BatchNorm2d(out_channels)
 
-    # interleaving operation
+	# interleaving operation
 	def interleave_helper(self, tensors, axis):
 		tensor_shape = None
 		if isinstance(tensors[0], torch.Tensor):
@@ -135,55 +133,55 @@ class FastUpConvolution(nn.Module):
 		return torch.view(torch.stack(tensors, axis + 1), new_shape)
 
 
-    def interleave(self, out1, out2, out3, out4):
+	def interleave(self, out1, out2, out3, out4):
 		left = self.interleave_helper([out1, out2], axis = 1)
 		right = self.interleave_helper([out3, out4], axis = 1)
 		output = self.interleave([left, right], axis = 2)
 
-        return output
+		return output
 
-    def forward(self, x):
-        out1 = self.conv1(x, nn.functional.pad(x, (1,1,1,1)))
-        out2 = self.conv2(x, nn.functional.pad(x, (1,1,1,0)))
-        out3 = self.conv3(x, nn.functional.pad(x, (1,0,1,1)))
-        out4 = self.conv4(x, nn.functional.pad(x, (1,0,1,0)))
+	def forward(self, x):
+		out1 = self.conv1(x, nn.functional.pad(x, (1,1,1,1)))
+		out2 = self.conv2(x, nn.functional.pad(x, (1,1,1,0)))
+		out3 = self.conv3(x, nn.functional.pad(x, (1,0,1,1)))
+		out4 = self.conv4(x, nn.functional.pad(x, (1,0,1,0)))
 
-        out = self.interleave(out1, out2, out3, out4)
+		out = self.interleave(out1, out2, out3, out4)
 
 		out = self.bn(out)
 
-        return out
+		return out
 
 class FastUpProjection(nn.Module):
 
-    def __init__(self, in_channels, out_channels, batch_size):
-        super(FastUpProjection, self).__init__()
+	def __init__(self, in_channels, out_channels, batch_size):
+		super(FastUpProjection, self).__init__()
 
-        self.UpConv1 = FastUpConvolution(in_channels, out_channels, batch_size)
-        self.relu1 = nn.ReLU(inplace = True)
+		self.UpConv1 = FastUpConvolution(in_channels, out_channels, batch_size)
+		self.relu1 = nn.ReLU(inplace = True)
 		self.bn = nn.BatchNorm2d(out_channels)
 
-        self.UpConv2 = FastUpConvolution(in_channels, out_channels, batch_size)
+		self.UpConv2 = FastUpConvolution(in_channels, out_channels, batch_size)
 
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3)
-        self.relu2 = nn.ReLU(inplace = True)
+		self.conv1 = nn.Conv2d(out_channels, out_channels, 3)
+		self.relu2 = nn.ReLU(inplace = True)
 
-    def forward(self, x):
-        out1 = self.UpConv1(x)
-        out2 = self.UpConv2(x)
+	def forward(self, x):
+		out1 = self.UpConv1(x)
+		out2 = self.UpConv2(x)
 
-        out1 = self.relu1(out1)
-        out1 = self.conv1(out1)
+		out1 = self.relu1(out1)
+		out1 = self.conv1(out1)
 		out1 = self.bn(out1)
 
-        out = out1 + out2
-        out = self.relu2(out)
+		out = out1 + out2
+		out = self.relu2(out)
 
-        return out
+		return out
 
 class Model(nn.Module):
 
-	def __init__(self, block1, block2, batch_size):
+	def __init__(self, batch_size):
 		super(Model, self).__init__()
 		self.batch_size = batch_size
 
@@ -213,7 +211,7 @@ class Model(nn.Module):
 		self.res4_2 = ResidualBlock(2048, d1 = 512, d2 = 2048)
 
 		self.conv2 = nn.Conv2d(2048, 1024, kernel_size = 1)
-		self.bn2 = BatchNorm2d(1024)
+		self.bn2 = nn.BatchNorm2d(1024)
 
 		self.UpProj1 = FastUpProjection(1024, 512, self.batch_size)
 		self.UpProj2 = FastUpProjection(512, 256, self.batch_size)
