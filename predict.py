@@ -9,6 +9,7 @@ import os
 from PIL import Image
 from scipy.ndimage import imread
 from skimage import img_as_float
+import scipy.misc
 import time
 
 
@@ -20,6 +21,7 @@ import torch
 from torch.autograd import Variable
 from torchvision.utils import save_image
 import sys
+
 
 class DepthPrediction:
 
@@ -36,8 +38,11 @@ class DepthPrediction:
 
 	def predict(self, img):
 		cropped_img = center_crop(img, 304, 228)
-		cropped_img = np.reshape(cropped_img, [3, 228, 304])
-		pytorch_img = torch.from_numpy(cropped_img).unsqueeze(0).float()
+		scipy.misc.toimage(cropped_img, cmin = 0.0, cmax = 1.0).save('cropped_img.jpg')
+
+
+		pytorch_img = torch.from_numpy(cropped_img).permute(2,0,1).unsqueeze(0).float()
+		save_image(pytorch_img, "input_image.jpg")
 		pytorch_input = Variable(pytorch_img)
 		t = time.time()
 		out_img = self.model(pytorch_input)

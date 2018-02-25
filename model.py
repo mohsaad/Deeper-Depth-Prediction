@@ -219,7 +219,7 @@ class Model(nn.Module):
 		self.UpProj3 = FastUpProjection(256, 128, self.batch_size)
 		self.UpProj4 = FastUpProjection(128, 64, self.batch_size)
 
-		self.conv3 = nn.Conv2d(64, 3, kernel_size = 3, padding = 1)
+		self.conv3 = nn.Conv2d(64, 1, kernel_size = 3, padding = 1)
 		self.relu2 = nn.ReLU(inplace = True)
 
 
