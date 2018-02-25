@@ -10,11 +10,11 @@ import torch
 def load_weights(model, filename, dtype):
 
 	model_params = model.state_dict()
-	data_dict = np.load(weights_file, encoding='latin1').item()
+	data_dict = np.load(filename, encoding='latin1').item()
 
 	# initial layer
 	model_params["conv1.weight"] = torch.from_numpy(data_dict["conv1"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["conv1.bias"] = torch.from_numpy(data_dict["conv1"]["weights"]).type(dtype)
+	model_params["conv1.bias"] = torch.from_numpy(data_dict["conv1"]["biases"]).type(dtype)
 	model_params["bn1.weight"] = torch.from_numpy(data_dict["bn_conv1"]["scale"]).type(dtype)
 	model_params["bn1.bias"] = torch.from_numpy(data_dict["bn_conv1"]["offset"]).type(dtype)
 
@@ -244,169 +244,169 @@ def load_weights(model, filename, dtype):
 	model_params["res4_2.bn3.bias"] = torch.from_numpy(data_dict["bn5c_branch2c"]["offset"]).type(dtype)
 
 	## Middle convolution layer
-	model_params["conv2.weight"] = torch.from_numpy(data_dict["conv2"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["conv2.bias"] = torch.from_numpy(data_dict["conv2"]["weights"]).type(dtype)
-	model_params["bn2.weight"] = torch.from_numpy(data_dict["bn_conv2"]["scale"]).type(dtype)
-	model_params["bn2.bias"] = torch.from_numpy(data_dict["bn_conv2"]["offset"]).type(dtype)
+	model_params["conv2.weight"] = torch.from_numpy(data_dict["layer1"]["weights"]).type(dtype).permute(3,2,0,1)
+	model_params["conv2.bias"] = torch.from_numpy(data_dict["layer1"]["biases"]).type(dtype)
+	model_params["bn2.weight"] = torch.from_numpy(data_dict["layer1_BN"]["scale"]).type(dtype)
+	model_params["bn2.bias"] = torch.from_numpy(data_dict["layer1_BN"]["offset"]).type(dtype)
 
 	## Up projection layer 1
 	model_params["UpProj1.UpConv1.conv1.weight"] = torch.from_numpy(data_dict["layer2x_br1_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvA"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj1.UpConv1.conv2.weight"] = torch.from_numpy(data_dict["layer2x_br1_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvB"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj1.UpConv1.conv3.weight"] = torch.from_numpy(data_dict["layer2x_br1_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvC"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj1.UpConv1.conv4.weight"] = torch.from_numpy(data_dict["layer2x_br1_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvD"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer2x_br1_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj1.UpConv1.bn1.weight"] = torch.from_numpy(data_dict["layer2x_br1_BN"]['scale']).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv1.bn1.bias"] = torch.from_numpy(data_dict["layer2x_br1_BN"]['offset']).type(dtype)
+	model_params["UpProj1.UpConv1.bn.weight"] = torch.from_numpy(data_dict["layer2x_br1_BN"]['scale']).type(dtype)
+	model_params["UpProj1.UpConv1.bn.bias"] = torch.from_numpy(data_dict["layer2x_br1_BN"]['offset']).type(dtype)
 
 	#
 	model_params["UpProj1.UpConv2.conv1.weight"] = torch.from_numpy(data_dict["layer2x_br2_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvA"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj1.UpConv2.conv2.weight"] = torch.from_numpy(data_dict["layer2x_br2_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvB"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj1.UpConv2.conv3.weight"] = torch.from_numpy(data_dict["layer2x_br2_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvC"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj1.UpConv2.conv4.weight"] = torch.from_numpy(data_dict["layer2x_br2_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvD"]["bias"].type(dtype)
+	model_params["UpProj1.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer2x_br2_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj1.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer2x_br2_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj1.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer2x_br2_BN"]['scale']).type(dtype)
 	model_params["UpProj1.UpConv2.bn.bias"] = torch.from_numpy(data_dict["layer2x_br2_BN"]['offset']).type(dtype)
 
 	model_params["UpProj1.conv1.weight"] = torch.from_numpy(data_dict["layer2x_Conv"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj1.conv1.bias"] = torch.from_numpy(data_dict["layer2x_Conv]["bias"].type(dtype)
+	model_params["UpProj1.conv1.bias"] = torch.from_numpy(data_dict["layer2x_Conv"]["biases"]).type(dtype)
 
 	#
-	model_params["UpProj1.bn.weight"] = torch.from_numpy(data_dict["layer2x_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj1.bn.weight"] = torch.from_numpy(data_dict["layer2x_BN"]['scale']).type(dtype)
 	model_params["UpProj1.bn.bias"] = torch.from_numpy(data_dict["layer2x_BN"]['offset']).type(dtype)
 
 	## Up projection layer 2
 	model_params["UpProj2.UpConv1.conv1.weight"] = torch.from_numpy(data_dict["layer4x_br1_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvA"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj2.UpConv1.conv2.weight"] = torch.from_numpy(data_dict["layer4x_br1_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvB"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj2.UpConv1.conv3.weight"] = torch.from_numpy(data_dict["layer4x_br1_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvC"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj2.UpConv1.conv4.weight"] = torch.from_numpy(data_dict["layer4x_br1_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvD"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer4x_br1_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj2.UpConv1.bn1.weight"] = torch.from_numpy(data_dict["layer4x_br1_BN"]['scale']).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv1.bn1.bias"] = torch.from_numpy(data_dict["layer4x_br1_BN"]['offset']).type(dtype)
+	model_params["UpProj2.UpConv1.bn.weight"] = torch.from_numpy(data_dict["layer4x_br1_BN"]['scale']).type(dtype)
+	model_params["UpProj2.UpConv1.bn.bias"] = torch.from_numpy(data_dict["layer4x_br1_BN"]['offset']).type(dtype)
 
 	#
 	model_params["UpProj2.UpConv2.conv1.weight"] = torch.from_numpy(data_dict["layer4x_br2_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvA"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj2.UpConv2.conv2.weight"] = torch.from_numpy(data_dict["layer4x_br2_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvB"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj2.UpConv2.conv3.weight"] = torch.from_numpy(data_dict["layer4x_br2_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvC"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj2.UpConv2.conv4.weight"] = torch.from_numpy(data_dict["layer4x_br2_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvD"]["bias"].type(dtype)
+	model_params["UpProj2.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer4x_br2_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj2.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer4x_br2_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj2.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer4x_br2_BN"]['scale']).type(dtype)
 	model_params["UpProj2.UpConv2.bn.bias"] = torch.from_numpy(data_dict["layer4x_br2_BN"]['offset']).type(dtype)
 
 	model_params["UpProj2.conv1.weight"] = torch.from_numpy(data_dict["layer4x_Conv"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj2.conv1.bias"] = torch.from_numpy(data_dict["layer4x_Conv]["bias"].type(dtype)
+	model_params["UpProj2.conv1.bias"] = torch.from_numpy(data_dict["layer4x_Conv"]["biases"]).type(dtype)
 
 	#
-	model_params["UpProj2.bn.weight"] = torch.from_numpy(data_dict["layer4x_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj2.bn.weight"] = torch.from_numpy(data_dict["layer4x_BN"]['scale']).type(dtype)
 	model_params["UpProj2.bn.bias"] = torch.from_numpy(data_dict["layer4x_BN"]['offset']).type(dtype)
 
 	## Up projection layer 3
 	model_params["UpProj3.UpConv1.conv1.weight"] = torch.from_numpy(data_dict["layer8x_br1_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvA"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj3.UpConv1.conv2.weight"] = torch.from_numpy(data_dict["layer8x_br1_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvB"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj3.UpConv1.conv3.weight"] = torch.from_numpy(data_dict["layer8x_br1_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvC"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj3.UpConv1.conv4.weight"] = torch.from_numpy(data_dict["layer8x_br1_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvD"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer8x_br1_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj3.UpConv1.bn1.weight"] = torch.from_numpy(data_dict["layer8x_br1_BN"]['scale']).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv1.bn1.bias"] = torch.from_numpy(data_dict["layer8x_br1_BN"]['offset']).type(dtype)
+	model_params["UpProj3.UpConv1.bn.weight"] = torch.from_numpy(data_dict["layer8x_br1_BN"]['scale']).type(dtype)
+	model_params["UpProj3.UpConv1.bn.bias"] = torch.from_numpy(data_dict["layer8x_br1_BN"]['offset']).type(dtype)
 
 	#
 	model_params["UpProj3.UpConv2.conv1.weight"] = torch.from_numpy(data_dict["layer8x_br2_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvA"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj3.UpConv2.conv2.weight"] = torch.from_numpy(data_dict["layer8x_br2_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvB"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj3.UpConv2.conv3.weight"] = torch.from_numpy(data_dict["layer8x_br2_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvC"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj3.UpConv2.conv4.weight"] = torch.from_numpy(data_dict["layer8x_br2_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvD"]["bias"].type(dtype)
+	model_params["UpProj3.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer8x_br2_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj3.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer8x_br2_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj3.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer8x_br2_BN"]['scale']).type(dtype)
 	model_params["UpProj3.UpConv2.bn.bias"] = torch.from_numpy(data_dict["layer8x_br2_BN"]['offset']).type(dtype)
 
 	model_params["UpProj3.conv1.weight"] = torch.from_numpy(data_dict["layer8x_Conv"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj3.conv1.bias"] = torch.from_numpy(data_dict["layer8x_Conv]["bias"].type(dtype)
+	model_params["UpProj3.conv1.bias"] = torch.from_numpy(data_dict["layer8x_Conv"]["biases"]).type(dtype)
 
 	#
-	model_params["UpProj3.bn.weight"] = torch.from_numpy(data_dict["layer8x_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj3.bn.weight"] = torch.from_numpy(data_dict["layer8x_BN"]['scale']).type(dtype)
 	model_params["UpProj3.bn.bias"] = torch.from_numpy(data_dict["layer8x_BN"]['offset']).type(dtype)
 
 	## Up projection layer 4
 	model_params["UpProj4.UpConv1.conv1.weight"] = torch.from_numpy(data_dict["layer16x_br1_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvA"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv1.conv1.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj4.UpConv1.conv2.weight"] = torch.from_numpy(data_dict["layer16x_br1_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvB"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv1.conv2.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj4.UpConv1.conv3.weight"] = torch.from_numpy(data_dict["layer16x_br1_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvC"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv1.conv3.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj4.UpConv1.conv4.weight"] = torch.from_numpy(data_dict["layer16x_br1_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvD"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv1.conv4.bias"] = torch.from_numpy(data_dict["layer16x_br1_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj4.UpConv1.bn1.weight"] = torch.from_numpy(data_dict["layer16x_br1_BN"]['scale']).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv1.bn1.bias"] = torch.from_numpy(data_dict["layer16x_br1_BN"]['offset']).type(dtype)
+	model_params["UpProj4.UpConv1.bn.weight"] = torch.from_numpy(data_dict["layer16x_br1_BN"]['scale']).type(dtype)
+	model_params["UpProj4.UpConv1.bn.bias"] = torch.from_numpy(data_dict["layer16x_br1_BN"]['offset']).type(dtype)
 
 	#
 	model_params["UpProj4.UpConv2.conv1.weight"] = torch.from_numpy(data_dict["layer16x_br2_ConvA"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvA"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv2.conv1.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvA"]["biases"]).type(dtype)
 
 	model_params["UpProj4.UpConv2.conv2.weight"] = torch.from_numpy(data_dict["layer16x_br2_ConvB"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvB"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv2.conv2.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvB"]["biases"]).type(dtype)
 
 	model_params["UpProj4.UpConv2.conv3.weight"] = torch.from_numpy(data_dict["layer16x_br2_ConvC"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvC"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv2.conv3.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvC"]["biases"]).type(dtype)
 
 	model_params["UpProj4.UpConv2.conv4.weight"] = torch.from_numpy(data_dict["layer16x_br2_ConvD"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvD"]["bias"].type(dtype)
+	model_params["UpProj4.UpConv2.conv4.bias"] = torch.from_numpy(data_dict["layer16x_br2_ConvD"]["biases"]).type(dtype)
 
-	model_params["UpProj4.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer16x_br2_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj4.UpConv2.bn.weight"] = torch.from_numpy(data_dict["layer16x_br2_BN"]['scale']).type(dtype)
 	model_params["UpProj4.UpConv2.bn.bias"] = torch.from_numpy(data_dict["layer16x_br2_BN"]['offset']).type(dtype)
 
 	model_params["UpProj4.conv1.weight"] = torch.from_numpy(data_dict["layer16x_Conv"]["weights"]).type(dtype).permute(3,2,0,1)
-	model_params["UpProj4.conv1.bias"] = torch.from_numpy(data_dict["layer16x_Conv]["bias"].type(dtype)
+	model_params["UpProj4.conv1.bias"] = torch.from_numpy(data_dict["layer16x_Conv"]["biases"]).type(dtype)
 
 	#
-	model_params["UpProj4.bn.weight"] = torch.from_numpy(data_dict["layer16x_BN"]['scale']).type(dtype).permute(3,2,0,1)
+	model_params["UpProj4.bn.weight"] = torch.from_numpy(data_dict["layer16x_BN"]['scale']).type(dtype)
 	model_params["UpProj4.bn.bias"] = torch.from_numpy(data_dict["layer16x_BN"]['offset']).type(dtype)
 
 	# final conv layer
-	model_params['conv3.weight'] = torch.from_numpy(data_dict['ConvPred']['weight']).type(dtype).permute(3,2,0,1)
-	model_params['conv3.bias'] = torch.from_numpy(data_dict['ConvPred']['weight']).type(dtype)
+	model_params['conv3.weight'] = torch.from_numpy(data_dict['ConvPred']['weights']).type(dtype).permute(3,2,0,1)
+	model_params['conv3.bias'] = torch.from_numpy(data_dict['ConvPred']['biases']).type(dtype)
 
 	return model_params
