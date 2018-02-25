@@ -9,6 +9,7 @@ import os
 from PIL import Image
 from scipy.ndimage import imread
 from skimage import img_as_float
+import time
 
 
 from model import *
@@ -35,18 +36,15 @@ class DepthPrediction:
 
 	def predict(self, img):
 		cropped_img = center_crop(img, 304, 228)
-		cropped_img = np.reshape(cropped_img, [3, 304, 228])
+		cropped_img = np.reshape(cropped_img, [3, 228, 304])
 		pytorch_img = torch.from_numpy(cropped_img).unsqueeze(0).float()
-		print(type(pytorch_img))
-		print(list(pytorch_img.size()))
 		pytorch_input = Variable(pytorch_img)
+		t = time.time()
 		out_img = self.model(pytorch_input)
-		print(type(out_img))
-		#save_image(pytorch_img, "output_image.png")
-
+		save_image(out_img.data, "output_image.jpg")
+		print("Finished image in {0} s".format(time.time() - t))
 
 if __name__ == '__main__':
 	prediction = DepthPrediction('NYU_ResNet-UpProj.npy', 1)
 	img = img_as_float(imread(sys.argv[1]))
-	print img.dtype
 	prediction.predict(img)

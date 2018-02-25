@@ -127,21 +127,17 @@ class FastUpConvolution(nn.Module):
 
 		# pretty much a tensorflow equivalent. prepend a [-1], stack the tensors, then reshape them
 
-		new_shape = [tensor_shape[0]] +[ x * 2 for x in tensor_shape[1:]]
-		print(new_shape)
-		return torch.stack(tensors, axis + 1).view(new_shape)
+		tensor_shape[axis+1] *= 2
+		return torch.stack(tensors, axis + 1).view(tensor_shape)
 
 
 	def interleave(self, out1, out2, out3, out4):
+
 		left = self.interleave_helper([out1, out2], axis = 1)
-		print('Left Interleave size ', list(left.size()))
 
 		right = self.interleave_helper([out3, out4], axis = 1)
-		print('Right Interleave size ', list(right.size()))
 
 		output = self.interleave_helper([left, right], axis = 2)
-
-		print('Output Interleave size ', list(output.size()))
 
 		return output
 
@@ -168,7 +164,7 @@ class FastUpProjection(nn.Module):
 
 		self.UpConv2 = FastUpConvolution(in_channels, out_channels, batch_size)
 
-		self.conv1 = nn.Conv2d(out_channels, out_channels, 3)
+		self.conv1 = nn.Conv2d(out_channels, out_channels, 3, padding = 1)
 		self.relu2 = nn.ReLU(inplace = True)
 
 	def forward(self, x):
@@ -223,7 +219,7 @@ class Model(nn.Module):
 		self.UpProj3 = FastUpProjection(256, 128, self.batch_size)
 		self.UpProj4 = FastUpProjection(128, 64, self.batch_size)
 
-		self.conv3 = nn.Conv2d(64, 3, kernel_size = 3)
+		self.conv3 = nn.Conv2d(64, 3, kernel_size = 3, padding = 1)
 		self.relu2 = nn.ReLU(inplace = True)
 
 
@@ -233,20 +229,14 @@ class Model(nn.Module):
 		out = self.relu1(out)
 		out = self.max_pool1(out)
 
-		print('Conv1 ', list(out.size()))
-
 		out = self.proj1(out)
 		out = self.res1_1(out)
 		out = self.res1_2(out)
-
-		print('Proj1 ', list(out.size()))
 
 		out = self.proj2(out)
 		out = self.res2_1(out)
 		out = self.res2_2(out)
 		out = self.res2_3(out)
-
-		print('Proj2 ',list(out.size()))
 
 		out = self.proj3(out)
 		out = self.res3_1(out)
@@ -255,35 +245,25 @@ class Model(nn.Module):
 		out = self.res3_4(out)
 		out = self.res3_5(out)
 
-		print('Proj3 ',list(out.size()))
-
 		out = self.proj4(out)
 		out = self.res4_1(out)
 		out = self.res4_2(out)
 
-		print('Proj4 ',list(out.size()))
 
 		out = self.conv2(out)
 		out = self.bn2(out)
 
-		print('Conv2 ',list(out.size()))
-
 		out = self.UpProj1(out)
-		print('UpProj1 ',list(out.size()))
 
 		out = self.UpProj2(out)
-		print('UpProj2 ',list(out.size()))
 
 		out = self.UpProj3(out)
-		print('UpProj3 ',list(out.size()))
 
 		out = self.UpProj4(out)
-		print('UpProj4 ',list(out.size()))
 
 		out = self.conv3(out)
 		out = self.relu2(out)
 
-		print(list(out.size()))
 		# insert upsampling here?
 
 		return out
