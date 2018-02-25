@@ -7,18 +7,21 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from torch.autograd import Variable
 
+import numpy as np
+
 class ResidualBlock(nn.Module):
 
 	def __init__(self, in_channels, d1, d2, stride = 1):
 		super(ResidualBlock, self).__init__()
 
 		# leading into d1
-		self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = 1, bias = False)
+		self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = stride, bias = False)
 		self.bn1 = nn.BatchNorm2d(d1)
 		self.relu1 = nn.ReLU(inplace = True)
 
+
 		# leading into d1-2
-		self.conv2 = nn.Conv2d(d1, d1, 3, padding = True, bias = False)
+		self.conv2 = nn.Conv2d(d1, d1, 3, padding = 1, bias = False)
 		self.bn2 = nn.BatchNorm2d(d1)
 		self.relu2 = nn.ReLU(inplace = True)
 
@@ -40,6 +43,7 @@ class ResidualBlock(nn.Module):
 		out = self.bn1(out)
 		out = self.relu1(out)
 
+
 		out = self.conv2(out)
 		out = self.bn2(out)
 		out = self.relu2(out)
@@ -59,12 +63,12 @@ class ProjectionBlock(nn.Module):
 		super(ProjectionBlock, self).__init__()
 
 		# feeding into first d1 block
-		self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = 5, bias = False)
+		self.conv1 = nn.Conv2d(in_channels, d1, 1, stride = stride, bias = False)
 		self.bn1 = nn.BatchNorm2d(d1)
 		self.relu1 = nn.ReLU(inplace = True)
 
 		# feeding into second d1 block
-		self.conv2 = nn.Conv2d(d1, d1, 3, padding = 2, bias = False)
+		self.conv2 = nn.Conv2d(d1, d1, 3, padding = 1, bias = False)
 		self.bn2 = nn.BatchNorm2d(d1)
 		self.relu2 = nn.ReLU(inplace = True)
 
@@ -73,7 +77,7 @@ class ProjectionBlock(nn.Module):
 		self.bn3 = nn.BatchNorm2d(d2)
 
 		# feeding into second d2 block
-		self.conv4 = nn.Conv2d(in_channels, d2, 1, stride = 5, bias = False)
+		self.conv4 = nn.Conv2d(in_channels, d2, 1, stride = stride, bias = False)
 		self.bn4 = nn.BatchNorm2d(d2)
 
 		self.relu3 = nn.ReLU(inplace = True)
@@ -119,32 +123,33 @@ class FastUpConvolution(nn.Module):
 
 	# interleaving operation
 	def interleave_helper(self, tensors, axis):
-		tensor_shape = None
-		if isinstance(tensors[0], torch.Tensor):
-			tensor_shape = list(tensors[0].size())
-		elif type(tensors[0] in [np.array, list, tuple]):
-			tensor_shape = np.shape(tensors[0])
-		else:
-			raise Exception("Bad tensor to interleave")
+		tensor_shape = list(tensors[0].size())
 
 		# pretty much a tensorflow equivalent. prepend a [-1], stack the tensors, then reshape them
-		new_shape = [-1] + tensor_shape
-		new_shape[axis] *= len(tensors)
-		return torch.view(torch.stack(tensors, axis + 1), new_shape)
+
+		new_shape = [tensor_shape[0]] +[ x * 2 for x in tensor_shape[1:]]
+		print(new_shape)
+		return torch.stack(tensors, axis + 1).view(new_shape)
 
 
 	def interleave(self, out1, out2, out3, out4):
 		left = self.interleave_helper([out1, out2], axis = 1)
+		print('Left Interleave size ', list(left.size()))
+
 		right = self.interleave_helper([out3, out4], axis = 1)
-		output = self.interleave([left, right], axis = 2)
+		print('Right Interleave size ', list(right.size()))
+
+		output = self.interleave_helper([left, right], axis = 2)
+
+		print('Output Interleave size ', list(output.size()))
 
 		return output
 
 	def forward(self, x):
-		out1 = self.conv1(x, nn.functional.pad(x, (1,1,1,1)))
-		out2 = self.conv2(x, nn.functional.pad(x, (1,1,1,0)))
-		out3 = self.conv3(x, nn.functional.pad(x, (1,0,1,1)))
-		out4 = self.conv4(x, nn.functional.pad(x, (1,0,1,0)))
+		out1 = self.conv1(nn.functional.pad(x, (1,1,1,1)))
+		out2 = self.conv2(nn.functional.pad(x, (1,1,1,0)))
+		out3 = self.conv3(nn.functional.pad(x, (1,0,1,1)))
+		out4 = self.conv4(nn.functional.pad(x, (1,0,1,0)))
 
 		out = self.interleave(out1, out2, out3, out4)
 
@@ -228,14 +233,20 @@ class Model(nn.Module):
 		out = self.relu1(out)
 		out = self.max_pool1(out)
 
+		print('Conv1 ', list(out.size()))
+
 		out = self.proj1(out)
 		out = self.res1_1(out)
 		out = self.res1_2(out)
+
+		print('Proj1 ', list(out.size()))
 
 		out = self.proj2(out)
 		out = self.res2_1(out)
 		out = self.res2_2(out)
 		out = self.res2_3(out)
+
+		print('Proj2 ',list(out.size()))
 
 		out = self.proj3(out)
 		out = self.res3_1(out)
@@ -244,21 +255,35 @@ class Model(nn.Module):
 		out = self.res3_4(out)
 		out = self.res3_5(out)
 
+		print('Proj3 ',list(out.size()))
+
 		out = self.proj4(out)
 		out = self.res4_1(out)
 		out = self.res4_2(out)
 
+		print('Proj4 ',list(out.size()))
+
 		out = self.conv2(out)
 		out = self.bn2(out)
 
+		print('Conv2 ',list(out.size()))
+
 		out = self.UpProj1(out)
+		print('UpProj1 ',list(out.size()))
+
 		out = self.UpProj2(out)
+		print('UpProj2 ',list(out.size()))
+
 		out = self.UpProj3(out)
+		print('UpProj3 ',list(out.size()))
+
 		out = self.UpProj4(out)
+		print('UpProj4 ',list(out.size()))
 
 		out = self.conv3(out)
 		out = self.relu2(out)
 
+		print(list(out.size()))
 		# insert upsampling here?
 
 		return out

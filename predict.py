@@ -35,9 +35,10 @@ class DepthPrediction:
 
 	def predict(self, img):
 		cropped_img = center_crop(img, 304, 228)
-		cropped_img = np.reshape(cropped_img, [3, 228, 304])
+		cropped_img = np.reshape(cropped_img, [3, 304, 228])
 		pytorch_img = torch.from_numpy(cropped_img).unsqueeze(0).float()
 		print(type(pytorch_img))
+		print(list(pytorch_img.size()))
 		pytorch_input = Variable(pytorch_img)
 		out_img = self.model(pytorch_input)
 		print(type(out_img))
