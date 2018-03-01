@@ -121,6 +121,19 @@ class FastUpConvolution(nn.Module):
 
 		self.bn = nn.BatchNorm2d(out_channels)
 
+	# this code comes from here: https://github.com/iapatil/depth-semantic-fully-conv
+	def prepare_indices(self, before, row, col, after, dims):
+
+		x0, x1, x2, x3 = np.meshgrid(before, row, col, after)
+		x_0 = torch.from_numpy(x0.reshape([-1]))
+		x_1 = torch.from_numpy(x1.reshape([-1]))
+		x_2 = torch.from_numpy(x2.reshape([-1]))
+		x_3 = torch.from_numpy(x3.reshape([-1]))
+
+		linear_indices = x_3 + dims[3] * x_2  + 2 * dims[2] * dims[3] * x_0 * 2 * dims[1] + 2 * dims[2] * dims[3] * x_1
+		return linear_indices
+
+
 	# interleaving operation
 	def interleave_helper(self, tensors, axis):
 		tensor_shape = list(tensors[0].size())
@@ -131,15 +144,61 @@ class FastUpConvolution(nn.Module):
 		return torch.stack(tensors, axis + 1).view(tensor_shape)
 
 
+	# this code comes from here: https://github.com/iapatil/depth-semantic-fully-conv
 	def interleave(self, out1, out2, out3, out4):
 
-		left = self.interleave_helper([out1, out2], axis = 1)
+		out1 = out1.permute(0, 2, 3, 1)
+		out2 = out2.permute(0, 2, 3, 1)
+		out3 = out3.permute(0, 2, 3, 1)
+		out4 = out4.permute(0, 2, 3, 1)
 
-		right = self.interleave_helper([out3, out4], axis = 1)
+		dims = out1.size()
+		dim1 = dims[1] * 2
+		dim2 = dims[2] * 2
 
-		output = self.interleave_helper([left, right], axis = 2)
+		print(list(dims), dim1, dim2)
 
-		return output
+		A_row_indices = range(0, dim1, 2)
+		print(A_row_indices)
+
+		A_col_indices = range(0, dim2, 2)
+		B_row_indices = range(1, dim1, 2)
+		B_col_indices = range(0, dim2, 2)
+		C_row_indices = range(0, dim1, 2)
+		C_col_indices = range(1, dim2, 2)
+		D_row_indices = range(1, dim1, 2)
+		D_col_indices = range(1, dim2, 2)
+
+		all_indices_before = range(int(self.batch_size))
+		all_indices_after = range(dims[3])
+
+		A_linear_indices = self.prepare_indices(all_indices_before, A_row_indices, A_col_indices, all_indices_after, dims)
+		B_linear_indices = self.prepare_indices(all_indices_before, B_row_indices, B_col_indices, all_indices_after, dims)
+		C_linear_indices = self.prepare_indices(all_indices_before, C_row_indices, C_col_indices, all_indices_after, dims)
+		D_linear_indices = self.prepare_indices(all_indices_before, D_row_indices, D_col_indices, all_indices_after, dims)
+
+		A_flat = (out1.permute(1, 0, 2, 3)).contiguous().view(-1)
+		B_flat = (out2.permute(1, 0, 2, 3)).contiguous().view(-1)
+		C_flat = (out3.permute(1, 0, 2, 3)).contiguous().view(-1)
+		D_flat = (out4.permute(1, 0, 2, 3)).contiguous().view(-1)
+
+		print(list(A_flat.size()))
+
+		size_ = A_linear_indices.size()[0] + B_linear_indices.size()[0]+C_linear_indices.size()[0]+D_linear_indices.size()[0]
+
+		Y_flat = torch.FloatTensor(size_).zero_()
+
+		Y_flat.scatter_(0, A_linear_indices.squeeze(),A_flat.data)
+		Y_flat.scatter_(0, B_linear_indices.squeeze(),B_flat.data)
+		Y_flat.scatter_(0, C_linear_indices.squeeze(),C_flat.data)
+		Y_flat.scatter_(0, D_linear_indices.squeeze(),D_flat.data)
+
+
+		Y = Y_flat.view(-1, dim1, dim2, dims[3])
+		print(list(Y.size()))
+		Y=Variable(Y.permute(0,3,1,2))
+
+		return Y
 
 	def forward(self, x):
 		out1 = self.conv1(nn.functional.pad(x, (1,1,1,1)))

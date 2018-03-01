@@ -31,7 +31,9 @@ class DepthPrediction:
 		self.model = Model(batch_size)
 		self.dtype = torch.cuda.FloatTensor
 
+
 		self.model.load_state_dict(load_weights(self.model, self.weight_file, self.dtype))
+		print("Model on cuda? {0}".format(next(self.model.parameters()).is_cuda))
 
 	def print_model(self):
 		print(self.model)
@@ -46,7 +48,7 @@ class DepthPrediction:
 		pytorch_input = Variable(pytorch_img)
 		t = time.time()
 		out_img = self.model(pytorch_input)
-		save_image(out_img.data, "output_image.jpg")
+		save_image(out_img.data, "output_image.jpg", normalize = True)
 		print("Finished image in {0} s".format(time.time() - t))
 
 if __name__ == '__main__':
