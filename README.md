@@ -15,4 +15,4 @@ Then, activate a PyTorch environment and run
 python predict.py <color_image>
 ```
 
-The output will be saved as `output_image.py`
+The output will be saved as `output_image.png`
