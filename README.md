@@ -15,4 +15,6 @@ Then, activate a PyTorch environment and run
 python predict.py <color_image>
 ```
 
-The output will be saved as `output_image.png`
+The output will be saved as `output_image.png`.
+
+My post detailing the paper and implementation can be found [here](http://mohsaad.com/2018/03/10/Deeper-Depth-Prediction/).
