@@ -156,10 +156,7 @@ class FastUpConvolution(nn.Module):
 		dim1 = dims[1] * 2
 		dim2 = dims[2] * 2
 
-		print(list(dims), dim1, dim2)
-
 		A_row_indices = range(0, dim1, 2)
-		print(A_row_indices)
 
 		A_col_indices = range(0, dim2, 2)
 		B_row_indices = range(1, dim1, 2)
@@ -182,8 +179,6 @@ class FastUpConvolution(nn.Module):
 		C_flat = (out3.permute(1, 0, 2, 3)).contiguous().view(-1)
 		D_flat = (out4.permute(1, 0, 2, 3)).contiguous().view(-1)
 
-		print(list(A_flat.size()))
-
 		size_ = A_linear_indices.size()[0] + B_linear_indices.size()[0]+C_linear_indices.size()[0]+D_linear_indices.size()[0]
 
 		Y_flat = torch.FloatTensor(size_).zero_()
@@ -195,7 +190,6 @@ class FastUpConvolution(nn.Module):
 
 
 		Y = Y_flat.view(-1, dim1, dim2, dims[3])
-		print(list(Y.size()))
 		Y=Variable(Y.permute(0,3,1,2))
 
 		return Y
