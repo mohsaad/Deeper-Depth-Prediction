@@ -102,6 +102,7 @@ ENV/
 
 # npy
 *.npy
+*.onnx
 
 # images
 *.jpg
